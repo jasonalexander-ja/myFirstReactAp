@@ -18,7 +18,7 @@ function Square(props) {
     renderSquare(i) {
       return (
         <Square 
-          value={this.props.squares[i] /* The state of the square is stored in the sqares array, in the parent class. */ } 
+          value={this.props.squares[i]}  /* The state of the square is stored in the sqares array, in the parent class. */  
           onClick={() => this.props.onClick(i)}
         />
       ); 
@@ -48,12 +48,12 @@ function Square(props) {
   }
   
   class Game extends React.Component {
-
     constructor(props) {
       super(props)
       this.state = {
         history: [{
-          squares: Array(9).fill(null),
+          squares: Array(this.props.cols * this.props.rows).fill(null),
+          changed: [0, 0],
         }],
         stepNumber: 0,
         xIsNext: true,
@@ -64,11 +64,15 @@ function Square(props) {
       const history = this.state.history.slice(0, this.state.stepNumber + 1);
       const current = history[history.length - 1];
       const squares = current.squares.slice();
+
       if(calculateWinner(squares) || squares[i]) return;
+
       squares[i] = this.state.xIsNext ? 'X' : 'O';
+      
       this.setState({
         history: history.concat([{
           squares: squares,
+          changed: makeCoordinate(i, this.props.cols, this.props.rows),
         }]),
         stepNumber: history.length,
         xIsNext: !this.state.xIsNext,
@@ -88,12 +92,20 @@ function Square(props) {
       const winner = calculateWinner(current.squares);
 
       const moves = history.map((step, move) => {
-        const desc = move ? `Move ${move}` : `Goto start.`;
+        const desc = move ? `Move ${move} (${step.changed[0]}, ${step.changed[1]})` 
+          : `Goto start.`;
+        if(move !== this.state.stepNumber) {
+          return (
+            <li key={move}>
+              <button onClick={() => this.jumpTo(move)}>{desc} </button> 
+            </li>
+          );
+        }
         return (
           <li key={move}>
-            <button onClick={() => this.jumpTo(move)}>{desc}</button>
+            <button onClick={() => this.jumpTo(move)}><strong>{desc}</strong></button> 
           </li>
-        );
+        )
       });
 
       let status;
@@ -105,6 +117,8 @@ function Square(props) {
             <Board 
               squares={current.squares}
               onClick={(i) => this.handleClick(i)}
+              cols={this.props.cols}
+              rows={this.props.rows}
             />
           </div>
           <div className="game-info">
@@ -116,6 +130,10 @@ function Square(props) {
     }
   }
   
+function makeCoordinate(num, cols, rows) {
+  return [num % cols, Math.floor(num / rows)];
+}
+
   function calculateWinner(squares) {
     const lines = [
       [0, 1, 2],
@@ -139,7 +157,10 @@ function Square(props) {
   // ========================================
   
   ReactDOM.render(
-    <Game />,
+    <Game 
+      cols={3}
+      rows={3}
+    />,
     document.getElementById('root')
   );
   
