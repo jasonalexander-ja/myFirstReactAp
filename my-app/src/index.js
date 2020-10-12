@@ -27,10 +27,10 @@ function Square(props) {
 
     renderRows() {
       let rows = [];
-      for(let i = 0; i < this.props.cols; i++) {
+      for(let i = 0; i < this.props.heightLen; i++) {
         let rowCells = [];
-        for(let it = 0; it < this.props.rows; it++) {
-          rowCells.push(this.renderSquare(it + (i * this.props.rows)));
+        for(let it = 0; it < this.props.heightLen; it++) {
+          rowCells.push(this.renderSquare(it + (i * this.props.heightLen)));
         }
       rows.push(<div className="board-row" key={`Row:${i}`}>{rowCells}</div>);
       }
@@ -51,7 +51,7 @@ function Square(props) {
       super(props)
       this.state = {
         history: [{
-          squares: Array(this.props.cols * this.props.rows).fill(null),
+          squares: Array(this.props.heightLen**2).fill(null),
           changed: [0, 0],
         }],
         stepNumber: 0,
@@ -65,14 +65,14 @@ function Square(props) {
       const current = history[history.length - 1];
       const squares = current.squares.slice();
 
-      if(calculateWinner(squares) || squares[i]) return;
+      if(calculateWinner(squares, this.props.heightLen) || squares[i]) return;
 
       squares[i] = this.state.xIsNext ? 'X' : 'O';
       
       this.setState({
         history: history.concat([{
           squares: squares,
-          changed: makeCoordinate(i, this.props.cols, this.props.rows),
+          changed: makeCoordinate(i, this.props.heightLen),
         }]),
         stepNumber: history.length,
         xIsNext: !this.state.xIsNext,
@@ -89,7 +89,7 @@ function Square(props) {
     render() {
       const history = this.state.history;
       const current = history[this.state.stepNumber];
-      const winner = calculateWinner(current.squares);
+      const winner = calculateWinner(current.squares, this.props.heightLen);
 
       let moves = history.map((step, move, arr) => {
         const desc = move ? `Move ${move} (${step.changed[0]}, ${step.changed[1]})` 
@@ -111,8 +111,7 @@ function Square(props) {
             <Board 
               squares={current.squares}
               onClick={(i) => this.handleClick(i)}
-              cols={this.props.cols}
-              rows={this.props.rows}
+              heightLen={this.props.heightLen}
             />
           </div>
           <div className="game-info">
@@ -131,11 +130,12 @@ function Square(props) {
     }
   }
   
-function makeCoordinate(num, cols, rows) {
-  return [num % cols, Math.floor(num / rows)];
+function makeCoordinate(num, heightLen) {
+  return [num % heightLen, Math.floor(num / heightLen)];
 }
 
-  function calculateWinner(squares) {
+  function calculateWinner(squares, size) {
+    console.log(Array.from({length: size** 2},(v,k)=>k))
     const lines = [
       [0, 1, 2],
       [3, 4, 5],
@@ -159,8 +159,7 @@ function makeCoordinate(num, cols, rows) {
   
   ReactDOM.render(
     <Game 
-      cols={3}
-      rows={3}
+      heightLen={3}
     />,
     document.getElementById('root')
   );
