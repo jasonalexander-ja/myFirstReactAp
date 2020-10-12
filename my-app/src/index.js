@@ -23,25 +23,23 @@ function Square(props) {
         />
       ); 
     }
+
+    renderRows() {
+      let rows = [];
+      for(let i = 0; i < this.props.cols; i++) {
+        let rowCells = [];
+        for(let it = 0; it < this.props.rows; it++) {
+          rowCells.push(this.renderSquare(it + (i * this.props.rows)));
+        }
+      rows.push(<div class="board-row">{rowCells}</div>);
+      }
+      return rows;
+    }
   
     render() {
       return (
         <div>
-          <div className="board-row">
-            {this.renderSquare(0)}
-            {this.renderSquare(1)}
-            {this.renderSquare(2)}
-          </div>
-          <div className="board-row">
-            {this.renderSquare(3)}
-            {this.renderSquare(4)}
-            {this.renderSquare(5)}
-          </div>
-          <div className="board-row">
-            {this.renderSquare(6)}
-            {this.renderSquare(7)}
-            {this.renderSquare(8)}
-          </div>
+          {this.renderRows()}
         </div>
       );
     }
@@ -57,6 +55,7 @@ function Square(props) {
         }],
         stepNumber: 0,
         xIsNext: true,
+        orderHistoryAsc: true,
       }
     }
 
@@ -91,7 +90,7 @@ function Square(props) {
       const current = history[this.state.stepNumber];
       const winner = calculateWinner(current.squares);
 
-      const moves = history.map((step, move) => {
+      let moves = history.map((step, move) => {
         const desc = move ? `Move ${move} (${step.changed[0]}, ${step.changed[1]})` 
           : `Goto start.`;
         if(move !== this.state.stepNumber) {
@@ -108,9 +107,12 @@ function Square(props) {
         )
       });
 
+      console.log(this.state.orderHistoryAsc);
+
       let status;
       if(winner) status = `Winner ${winner}`;
       else status = `Next player: ${this.state.xIsNext ? 'X' : 'O'}`;
+      let reorder = this.state.orderHistoryAsc ? "Descending" : "Ascending";
       return (
         <div className="game">
           <div className="game-board">
@@ -123,6 +125,13 @@ function Square(props) {
           </div>
           <div className="game-info">
             <div>{status}</div>
+            <div>
+              <button 
+                onClick={() => this.setState({orderHistoryAsc: !this.state.orderHistoryAsc})}
+              >
+                {reorder}
+              </button>
+            </div>
             <ol>{moves}</ol>
           </div>
         </div>
