@@ -25,6 +25,11 @@ function Square(props) {
     }
   
     render() {
+      const squareCount = this.props.cols * this.props.rows;
+      let squareArr = Array(squareCount);
+      for(let i = 0; i < squareCount; i++) {
+        console.log(i);
+      }
       return (
         <div>
           <div className="board-row">
