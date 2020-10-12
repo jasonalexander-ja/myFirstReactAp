@@ -20,6 +20,7 @@ function Square(props) {
         <Square 
           value={this.props.squares[i]}  /* The state of the square is stored in the sqares array, in the parent class. */  
           onClick={() => this.props.onClick(i)}
+          key={`CellNumber:${i}`}
         />
       ); 
     }
@@ -31,17 +32,12 @@ function Square(props) {
         for(let it = 0; it < this.props.rows; it++) {
           rowCells.push(this.renderSquare(it + (i * this.props.rows)));
         }
-      rows.push(<div class="board-row">{rowCells}</div>);
+      rows.push(<div className="board-row" key={`Row:${i}`}>{rowCells}</div>);
       }
       return rows;
     }
   
     render() {
-      const squareCount = this.props.cols * this.props.rows;
-      let squareArr = Array(squareCount);
-      for(let i = 0; i < squareCount; i++) {
-        console.log(i);
-      }
       return (
         <div>
           {this.renderRows()}
@@ -95,29 +91,20 @@ function Square(props) {
       const current = history[this.state.stepNumber];
       const winner = calculateWinner(current.squares);
 
-      let moves = history.map((step, move) => {
+      let moves = history.map((step, move, arr) => {
         const desc = move ? `Move ${move} (${step.changed[0]}, ${step.changed[1]})` 
           : `Goto start.`;
-        if(move !== this.state.stepNumber) {
-          return (
-            <li key={move}>
-              <button onClick={() => this.jumpTo(move)}>{desc} </button> 
-            </li>
-          );
-        }
+        let weight = move === this.state.stepNumber ? 'bold-text' : '';
         return (
           <li key={move}>
-            <button onClick={() => this.jumpTo(move)}><strong>{desc}</strong></button> 
+            <button onClick={() => this.jumpTo(move)} className={weight}>{desc}</button> 
           </li>
-        )
+        );
       });
+      let status = winner ? `Winner ${winner}` : `Next player: ${this.state.xIsNext ? 'X' : 'O'}`;
 
-      console.log(this.state.orderHistoryAsc);
-
-      let status;
-      if(winner) status = `Winner ${winner}`;
-      else status = `Next player: ${this.state.xIsNext ? 'X' : 'O'}`;
-      let reorder = this.state.orderHistoryAsc ? "Descending" : "Ascending";
+      moves = this.state.orderHistoryAsc ? moves.reverse() : moves;
+      let reorder = this.state.orderHistoryAsc ? 'Ascending' : 'Descending';
       return (
         <div className="game">
           <div className="game-board">
